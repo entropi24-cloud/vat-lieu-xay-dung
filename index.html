@@ -13,11 +13,50 @@
     .card h3 { margin-top: 0; }
     .contact-btn { display: inline-block; background: #2d6cdf; color: white; padding: 12px 20px; border-radius: 8px; text-decoration: none; margin-top: 20px; }
     footer { text-align: center; padding: 20px; background: #eee; margin-top: 40px; }
+
+    /* Chatbox */
+    .chatbox {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 300px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      overflow: hidden;
+      display: none;
+      flex-direction: column;
+      font-family: Arial, sans-serif;
+      z-index: 9999;
+    }
+    .chatbox-header { background: #2d6cdf; color: white; padding: 10px; font-weight: bold; }
+    .chatbox-messages { height: 220px; padding: 10px; overflow-y: auto; background: #f5f5f5; font-size: 14px; }
+    .chatbox-input { display: flex; border-top: 1px solid #ddd; }
+    .chatbox-input input { flex: 1; padding: 10px; border: none; outline: none; }
+    .chatbox-input button { background: #2d6cdf; color: white; border: none; padding: 10px 15px; cursor: pointer; }
+
+    .chat-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #2d6cdf;
+      color: white;
+      border-radius: 50%;
+      width: 55px;
+      height: 55px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 26px;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      z-index: 9999;
+    }
   </style>
 </head>
 <body>
   <header>
-    <h1>Vật Liệu Xây Dựng Thanh Binh 1 </h1>
+    <h1>Vật Liệu Xây Dựng</h1>
     <p>Chất lượng - Uy tín - Giá tốt</p>
   </header>
 
@@ -42,128 +81,59 @@
   </div>
 
   <footer>
-    © 2025 Thanh Binh 1 VLXD
+    © 2025 Minh Phát VLXD
   </footer>
+
+  <!-- Chat Toggle -->
+  <div class="chat-toggle" onclick="toggleChat()">💬</div>
+
+  <!-- Chatbox -->
+  <div class="chatbox" id="chatbox">
+    <div class="chatbox-header">Hỗ trợ khách hàng</div>
+    <div class="chatbox-messages" id="messages"></div>
+    <div class="chatbox-input">
+      <input type="text" id="chatInput" placeholder="Nhập tin nhắn..." />
+      <button onclick="sendMessage()">Gửi</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+  <script>
+    const SERVER_URL = "https://vlxd-chat-server.onrender.com";
+    const socket = io(SERVER_URL);
+
+    function toggleChat() {
+      const box = document.getElementById("chatbox");
+      box.style.display = box.style.display === "flex" ? "none" : "flex";
+    }
+
+    function sendMessage() {
+      const input = document.getElementById("chatInput");
+      const messages = document.getElementById("messages");
+
+      if (input.value.trim() === "") return;
+
+      const msg = document.createElement("div");
+      msg.textContent = "Bạn: " + input.value;
+      messages.appendChild(msg);
+
+      socket.emit("client_message", { text: input.value });
+
+      input.value = "";
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    // Nhận tin nhắn từ admin
+    socket.on("server_message", (data) => {
+      const messages = document.getElementById("messages");
+      const msg = document.createElement("div");
+      msg.textContent = "Admin: " + data.text;
+      msg.style.color = "blue";
+      messages.appendChild(msg);
+      messages.scrollTop = messages.scrollHeight;
+    });
+  </script>
+
 </body>
 </html>
-<!-- Chatbox Styles -->
-<style>
-  .chatbox {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 300px;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    overflow: hidden;
-    display: none;
-    flex-direction: column;
-    font-family: Arial, sans-serif;
-    z-index: 9999;
-  }
-  .chatbox-header {
-    background: #2d6cdf;
-    color: white;
-    padding: 10px;
-    font-weight: bold;
-  }
-  .chatbox-messages {
-    height: 220px;
-    padding: 10px;
-    overflow-y: auto;
-    background: #f5f5f5;
-    font-size: 14px;
-  }
-  .chatbox-input {
-    display: flex;
-    border-top: 1px solid #ddd;
-  }
-  .chatbox-input input {
-    flex: 1;
-    padding: 10px;
-    border: none;
-    outline: none;
-  }
-  .chatbox-input button {
-    background: #2d6cdf;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    cursor: pointer;
-  }
-
-  /* Nút mở chat */
-  .chat-toggle {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: #2d6cdf;
-    color: white;
-    border-radius: 50%;
-    width: 55px;
-    height: 55px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 26px;
-    cursor: pointer;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    z-index: 9999;
-  }
-</style>
-
-<!-- Chat toggle -->
-<div class="chat-toggle" onclick="toggleChat()">💬</div>
-
-<!-- Chatbox -->
-<div class="chatbox" id="chatbox">
-  <div class="chatbox-header">Hỗ trợ khách hàng</div>
-  <div class="chatbox-messages" id="messages"></div>
-  <div class="chatbox-input">
-    <input type="text" id="chatInput" placeholder="Nhập tin nhắn..." />
-    <button onclick="sendMessage()">Gửi</button>
-  </div>
-</div>
-
-<!-- Socket.io -->
-<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-
-<script>
-  const SERVER_URL = "https://vlxd-chat-server.onrender.com"; // Server của bạn
-  const socket = io(SERVER_URL);
-
-  function toggleChat() {
-    const box = document.getElementById("chatbox");
-    box.style.display = box.style.display === "flex" ? "none" : "flex";
-  }
-
-  function sendMessage() {
-    const input = document.getElementById("chatInput");
-    const messages = document.getElementById("messages");
-
-    if (input.value.trim() === "") return;
-
-    // Hiển thị tin nhắn của khách
-    const msg = document.createElement("div");
-    msg.textContent = "Bạn: " + input.value;
-    messages.appendChild(msg);
-
-    // Gửi lên server
-    socket.emit("client_message", { text: input.value });
-
-    input.value = "";
-    messages.scrollTop = messages.scrollHeight;
-  }
-
-  // Nhận tin từ admin
-  socket.on("admin_reply", (payload) => {
-    const messages = document.getElementById("messages");
-    const msg = document.createElement("div");
-    msg.textContent = "Admin: " + payload.text;
-    msg.style.color = "blue";
-    messages.appendChild(msg);
-    messages.scrollTop = messages.scrollHeight;
-  });
-</script>
-
